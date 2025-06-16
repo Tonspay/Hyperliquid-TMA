@@ -652,6 +652,14 @@ const Dashboard = () => {
                       </pre>
                   </div>
 
+              <div className="w-full  flex justify-center items-center ">
+                <button
+                  onClick={onSendOpen}
+                  className="rounded-xl w-[80%] bg-green-200 hover:bg-green-400 transition text-center py-2 rounded"
+                >
+                  Send fund on HyperLiquid 
+                </button>
+              </div>
               <div className="w-full flex justify-center items-center">
                 <div className="flex space-x-1">
                   <button
@@ -680,14 +688,7 @@ const Dashboard = () => {
                   </button>
                 </div>
               </div>
-              <div className="w-full  flex justify-center items-center ">
-                <button
-                  onClick={onSendOpen}
-                  className="rounded-xl w-[80%] bg-green-200 hover:bg-green-400 transition text-center py-2 rounded"
-                >
-                  Send fund on HyperLiquid 
-                </button>
-              </div>
+
 
               </div>
             </div>
@@ -715,7 +716,7 @@ const Dashboard = () => {
                   positions.map((item, index) => (
                     <div className="flex w-full bg-gray-50 rounded-xl mb-3">
                       <div className="w-[80%] flex flex-col items-center justify-center">
-                        <div className="w-full text-center text-xl"><p> <a>{item.position.leverage.value}x</a> {item.position.coin} </p></div>
+                        <div className="w-full text-center text-xl"><p> <a>{item.position.leverage.value}x</a> {item.position.coin} <a className={"text-sm " + (Number(item.position.unrealizedPnl)>0) ? "bg-red-300" : "bg-green-300"}>{(Number(item.position.unrealizedPnl)>0)?"+":null} {((Number(item.position.unrealizedPnl)*100/Number(item.position.positionValue)).toFixed(2))}%</a> </p></div>
                       
                         <div className="w-full text-center">
                           <p>

@@ -18,7 +18,7 @@ const routes = [
   {
     name: 'Trade',
     layout: '/home',
-    path: 'trade',
+    path: 'dev',
     icon: <RiStockLine className="h-6 w-6" />,
 
     secondary: true,
