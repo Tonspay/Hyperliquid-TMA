@@ -16,19 +16,19 @@ const routes = [
     icon: <CgProfile className="h-6 w-6" />,
   },
   {
-    name: 'Spot Trading',
+    name: 'Trade',
     layout: '/home',
-    path: 'spot',
+    path: 'trade',
     icon: <RiStockLine className="h-6 w-6" />,
 
     secondary: true,
   },
-  {
-    name: 'Future Trading',
-    layout: '/home',
-    icon: <AiOutlineStock className="h-6 w-6" />,
-    path: 'dev',
-  },
+  // {
+  //   name: 'Future Trading',
+  //   layout: '/home',
+  //   icon: <AiOutlineStock className="h-6 w-6" />,
+  //   path: 'dev',
+  // },
   {
     name: 'Support',
     layout: '/links',

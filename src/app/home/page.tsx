@@ -25,6 +25,8 @@ const Dashboard = () => {
 
   const { open: exportOpen, onOpen: onExportOpen, onClose: onExportClose } = useDisclosure();
 
+  const { open: addressOpen, onOpen: onAddressOpen, onClose: onAddressClose } = useDisclosure();
+
   const [from, setFrom] = useState("TON");
 
   const [to, setTo] = useState("USDCARBITRUM");
@@ -66,18 +68,37 @@ const Dashboard = () => {
     }
   );
 
+  const [positions, setPositions] = useState(
+    []
+  )
+
   const wallet = useTonWallet();
 
   const testAddress = "0xB3EEd3791DC4Ef67e8123c85ba8414eAB4F8bA38"
+  const [address , setAddress] = useState("")
+  const [addressQR , setAddressQR] = useState("")
 
   useEffect(() => {
     const init = async () => {
+      setAddress(testAddress);
+      setAddressQR(
+        await generateQRCodeBase64(
+          testAddress
+        )
+      )
       const bal = await getAccountInfo(testAddress)
       if(bal)
       {
         let sum = JSON.parse(JSON.stringify(bal.marginSummary))
         sum['withdrawable'] = bal.withdrawable
         setAccountInfo(sum)
+
+        if(bal?.assetPositions && bal.assetPositions.length>0)
+        {
+          setPositions(
+            bal.assetPositions
+          )
+        }
       }
       
       // setInvoiceAddress("UQAI9ack-mbNMw2oQEuiB6899ZZ1gdDAZXWzv_oIz_N7j9-0")
@@ -171,7 +192,7 @@ const Dashboard = () => {
     }
     const result = await api_deposite(
       {
-        address:testAddress,
+        address:address,
         amount:fromAmount
       }
     )
@@ -430,14 +451,14 @@ const Dashboard = () => {
                   </section>
                   <section className="flex flex-col gap-2">
                       <div className="w-full flex justify-center items-center">
-                          <pre className="text-sm bg-gray-100 p-2 rounded">{testAddress}
+                          <pre className="text-sm bg-gray-100 p-2 rounded">{address}
 
                           </pre>
                       </div>
                        <div className="w-full flex justify-center items-center">
                         <button
                           onClick={async () => {
-                            await navigator.clipboard.writeText(testAddress);
+                            await navigator.clipboard.writeText(address);
                           }}
                           className="w-[50%] rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
                         >
@@ -457,7 +478,55 @@ const Dashboard = () => {
           </div>
       </div>
 
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray" style={{
+        display : addressOpen?"block":"none",
+        backgroundColor:"transparent"
+      }}>
+        <div className="bg-gray-300/70 p-6 rounded-xl shadow-lg h-full flex items-center justify-center" onClick={onAddressClose}>
+            <div style={{maxWidth:"600px" , minWidth:"400px"}}>
+            <Card extra="rounded-[20px] p-3"  onClick={(e:any) => e.stopPropagation()}>
+            <section className="flex items-center py-2">
+                    <p className="grow text-center font-bold">Send fund to your wallet</p>
+                  </section>
+                  <section className="flex flex-col gap-2">
+                      <div className="w-full flex justify-center items-center">
+                          <pre className="text-sm bg-gray-100 p-2 rounded">{address}
 
+                          </pre>
+                      </div>
+                       <div className="w-full flex justify-center items-center">
+                        <button
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(address);
+                          }}
+                          className="w-[50%] rounded-xl w-32 bg-gray-200 hover:bg-gray-400 transition text-center py-2 rounded"
+                        >
+                          Copy
+                        </button>
+                       </div>
+                    <div className="w-full flex justify-center items-center">
+                        <img
+                        src={addressQR?addressQR:"/img/logo.png"}
+                        style={{
+                          width:"50%",
+                          height:"50%",
+                          minWidth:"256px",
+                          minHeight:"256px"
+                        }}
+                        />
+                      </div>
+
+                      <div className="w-full flex justify-center items-center text-sm">
+                        {"⚠ Please make sure you send funds inside hyperliquid . Don't send it on ARB . "}
+                      </div>
+                  </section>
+                  
+            </Card>
+            </div>
+
+          </div>
+      </div>
+      
         <div className="w-full p-1">
           <Card extra="rounded-[20px] p-3">
             <div className="flex gap-2.5 justify-center">
@@ -496,7 +565,7 @@ const Dashboard = () => {
 
               <div className="w-full">
                   <div className="w-full flex justify-center items-center">
-                      <pre className="text-sm bg-gray-100 p-2 rounded">{testAddress}
+                      <pre className="text-sm bg-gray-100 p-2 rounded">{address}
 
                       </pre>
                   </div>
@@ -505,7 +574,7 @@ const Dashboard = () => {
                 <div className="flex space-x-1">
                   <button
                     onClick={async () => {
-                      await navigator.clipboard.writeText(testAddress);
+                      await navigator.clipboard.writeText(address);
                     }}
                     className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
                   >
@@ -514,7 +583,7 @@ const Dashboard = () => {
 
                   <button
                     onClick={async () => {
-                      window.open(`https://app.hyperliquid.xyz/explorer/address/${testAddress}`)
+                      window.open(`https://app.hyperliquid.xyz/explorer/address/${address}`)
                     }}
                     className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
                   >
@@ -535,6 +604,50 @@ const Dashboard = () => {
 
           </Card>
         </div>
+
+        {
+          positions.length==0&&false ?
+          null:
+          
+        <div className="w-full p-1">
+          <Card extra="rounded-[20px] p-3">
+            <div className="flex gap-2.5 justify-center">
+                      <div className="flex flex-col border-dashed border-2 border-divider py-2 px-6 rounded-xl">
+                        <span className="text-default-900 text-xl font-semibold">
+                          My Positions
+                        </span>
+                      </div>
+            </div>
+            <div className="w-full">
+
+              <div className="w-full flex flex-col">
+                {
+                  positions.map((item, index) => (
+                    <div className="flex w-full bg-gray-50 rounded-xl mb-3">
+                      <div className="w-[80%] flex flex-col items-center justify-center">
+                        <div className="w-full text-center text-xl"><p> <a>{item.position.leverage.value}x</a> {item.position.coin} </p></div>
+                      
+                        <div className="w-full text-center">
+                          <p>
+                              <a  className="bg-gray-200   font-bold ">{item.position.positionValue}$</a>  <a  className="bg-gray-200   font-bold ">{item.position.unrealizedPnl}$</a>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="w-[20%]  font-bold flex flex-col items-center justify-center">
+                        <button className="w-full text-xl rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded">
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                }
+
+              </div>
+            </div>
+
+          </Card>
+        </div>
+        }
         <div className="w-full p-1">
           <Card extra="rounded-[20px] p-3">
             <div className="flex gap-2.5 justify-center">
@@ -555,7 +668,7 @@ const Dashboard = () => {
                         {
                           search_token_by_id(from) ? 
                           <button
-                          className="flex items-center gap-2 rounded-xl p-2 cursor-pointer bg-[#e6ddc0] hover:bg-black"
+                          className="flex items-center gap-2 rounded-xl p-2 cursor-pointer bg-gray-500 hover:bg-black"
                           style={{ minWidth: "15%" }}
                           onClick={
                             ()=>
@@ -639,13 +752,25 @@ const Dashboard = () => {
                       Deposit Fee : 1 $
                     </div>
                     <div className="bottom-14 right-0 w-full p-4">
-
-                  <button
-                    className="w-full min-h-[50px] rounded-xl bg-[#e6ddc0] text-white text-lg font-semibold hover:bg-[#614c38] transition duration-200 shadow-md"
-                    onClick={confirm}
-                  >
-                    Deposit Now
-                  </button>
+                        <button
+                          className="w-full min-h-[50px] rounded-xl bg-gray-500 text-white text-lg font-semibold hover:bg-gray-200 transition duration-200 shadow-md"
+                          onClick={confirm}
+                        >
+                          Deposit Now
+                        </button>
+                    </div>
+                    <div className="w-full flex justify-center items-center text-sm">
+                      OR
+                    </div>
+                    <div className="w-full flex justify-center items-center text-sm">
+                      <div className="bottom-14 right-0 w-full p-4">
+                        <button
+                          className="w-full  min-h-[50px] rounded-xl text-black text-sm font-semibold shadow-md"
+                          onClick={onAddressOpen}
+                        >
+                          Deposit On Hyperliquid
+                        </button>
+                    </div>
                     </div>
                       </div>
                   </div>
