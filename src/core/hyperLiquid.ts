@@ -16,6 +16,17 @@ const getAccountOpenOrders = async (address:string) =>
         { user:(address as any) }
     )
 }
+
+const sendFundToOthers = async (wallet:any,amount:number,to:string) =>
+{
+    const exchClient = new ExchangeClient({ wallet, transport });
+    return await exchClient.usdSend(
+      {
+        destination: address as any,
+        amount: Number(amount).toFixed(2),
+      }
+    )
+}
 export {
     getAccountInfo,
     getAccountOpenOrders

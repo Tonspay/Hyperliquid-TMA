@@ -6,6 +6,12 @@ const config = {
             deposite_check:"/deposite"
         }
     },
+    storage:{
+        baseTag:"hyperliquid_",
+        router:{
+            key:"key",
+        }
+    },
     chains:[
         // {
         //     name:"SOL",
