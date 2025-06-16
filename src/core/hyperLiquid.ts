@@ -26,8 +26,37 @@ const sendFundToOthers = async (wallet:any,amount:number,to:string) =>
       }
     )
 }
+
+const closePosition = async (wallet:any, {
+    symbol,
+    amount
+}) =>
+{
+    const exchClient = new ExchangeClient({ wallet, transport });
+    return await exchClient.order(
+    {
+        orders: [{
+            a: symbol,
+            b: false,
+            p: "0",
+            s: amount,
+            r: false,
+            t:{
+                trigger:{
+                    isMarket:true,
+                    triggerPx:"",
+                    tpsl:"tp"
+                }
+            }
+            
+        }],
+        grouping: "na",
+    }
+)
+}
 export {
     getAccountInfo,
     getAccountOpenOrders,
     sendFundToOthers,
+    closePosition
 }

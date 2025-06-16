@@ -17,7 +17,8 @@ import {TonConnectButton} from "@tonconnect/ui-react";
 import TonWeb from 'tonweb';
 import { api_deposite, api_deposite_check } from "core/api";
 import { address } from "@ton/core";
-import { getAccountInfo } from "core/hyperLiquid";
+import { closePosition, getAccountInfo, sendFundToOthers } from "core/hyperLiquid";
+import { getWallet } from "core/web3";
 const Dashboard = () => {
   const { open, onOpen, onClose } = useDisclosure()
 
@@ -28,6 +29,10 @@ const Dashboard = () => {
   const { open: addressOpen, onOpen: onAddressOpen, onClose: onAddressClose } = useDisclosure();
 
   const { open: sendOpen, onOpen: onSendOpen, onClose: onSendClose } = useDisclosure();
+
+  const [sendTo, setSendTo] = useState("");
+
+  const [sendAmount, setSendAmount] = useState(0);
 
   const [from, setFrom] = useState("TON");
 
@@ -76,19 +81,23 @@ const Dashboard = () => {
 
   const wallet = useTonWallet();
 
-  const testAddress = "0xB3EEd3791DC4Ef67e8123c85ba8414eAB4F8bA38"
   const [address , setAddress] = useState("")
   const [addressQR , setAddressQR] = useState("")
 
   useEffect(() => {
     const init = async () => {
-      setAddress(testAddress);
+      const wallet = getWallet()
+      if(!wallet)
+      {
+        return false;
+      }
+      setAddress(wallet.address);
       setAddressQR(
         await generateQRCodeBase64(
-          testAddress
+          wallet.address
         )
       )
-      const bal = await getAccountInfo(testAddress)
+      const bal = await getAccountInfo(wallet.address)
       if(bal)
       {
         let sum = JSON.parse(JSON.stringify(bal.marginSummary))
@@ -285,6 +294,15 @@ const Dashboard = () => {
     setTimeout(() => setCopiedIndex(1), 2000);
   };
 
+  const sendFund = async () =>
+  {
+    const send = await sendFundToOthers(getWallet(),sendAmount,sendTo);
+    console.log("send",send);
+    if(send)
+    {
+      window.location.reload()
+    }
+  }
 
   return (
       <div className="p-5 space-y-5 mt-5 block w-full justify-items-center">
@@ -555,7 +573,7 @@ const Dashboard = () => {
                           placeholder="Who to recive the fund"
                           
                           onChange={(e: any) => {
-                            // setFromAmount(e.target.value)
+                            setSendTo(e.target.value)
                           }}
                         
                           key="addressinput"
@@ -579,7 +597,8 @@ const Dashboard = () => {
                           placeholder="Min 1 $"
                           
                           onChange={(e: any) => {
-                            // setFromAmount(e.target.value)
+                          
+                            setSendAmount(e.target.value)
                           }}
                         
                           key="sendinput"
@@ -589,9 +608,7 @@ const Dashboard = () => {
 
                         <div className="w-full flex justify-center items-center">
                         <button
-                          onClick={async () => {
-                          //TODO send fund fnctions
-                          }}
+                          onClick={sendFund}
                           className="w-[50%] rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
                         >
                           Confirm
@@ -655,7 +672,7 @@ const Dashboard = () => {
               <div className="w-full  flex justify-center items-center ">
                 <button
                   onClick={onSendOpen}
-                  className="rounded-xl w-[80%] bg-green-200 hover:bg-green-400 transition text-center py-2 rounded"
+                  className="rounded-xl w-[80%] bg-green-200 hover:bg-green-400 transition text-center py-2 rounded shadow-md"
                 >
                   Send fund on HyperLiquid 
                 </button>
@@ -666,7 +683,7 @@ const Dashboard = () => {
                     onClick={async () => {
                       await navigator.clipboard.writeText(address);
                     }}
-                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
+                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded shadow-md"
                   >
                     Copy
                   </button>
@@ -675,14 +692,14 @@ const Dashboard = () => {
                     onClick={async () => {
                       window.open(`https://app.hyperliquid.xyz/explorer/address/${address}`)
                     }}
-                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
+                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded shadow-md"
                   >
                     History
                   </button>
 
                   <button
                     onClick={onExportOpen}
-                    className="rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
+                    className="rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded shadow-md"
                   >
                     Export Wallet
                   </button>
@@ -725,7 +742,21 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div className="w-[20%]  font-bold flex flex-col items-center justify-center">
-                        <button className="w-full text-xl rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded">
+                        <button className="w-full text-xl rounded-xl w-24 bg-white hover:bg-gray-400 transition text-center py-2 rounded shadow-lg"
+                        onClick={
+                          async()=>
+                          {
+                            const cls = await closePosition(getWallet(),
+                              {
+                                symbol:item.position.coin,
+                                amount:item.position.szi
+                              }
+                            )
+
+                            console.log("Try close position ::",cls)
+                          }
+                        }
+                        >
                           Close
                         </button>
                       </div>

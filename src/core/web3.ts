@@ -3,7 +3,8 @@ import { getKey } from "./storage";
 
 const getWallet = () =>
 {
-    const key = getKey();
+    // const key = getKey();
+    const key = "";
     if(!key)
     {
         return false;
