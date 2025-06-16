@@ -19,6 +19,7 @@ import { api_deposite, api_deposite_check } from "core/api";
 import { address } from "@ton/core";
 import { closePosition, getAccountInfo, sendFundToOthers } from "core/hyperLiquid";
 import { getWallet } from "core/web3";
+import { getKey } from "core/storage";
 const Dashboard = () => {
   const { open, onOpen, onClose } = useDisclosure()
 
@@ -473,14 +474,14 @@ const Dashboard = () => {
                   </section>
                   <section className="flex flex-col gap-2">
                       <div className="w-full flex justify-center items-center">
-                          <pre className="text-sm bg-gray-100 p-2 rounded">{address}
+                          <pre className="text-sm bg-gray-100 p-2 rounded">{getKey()}
 
                           </pre>
                       </div>
                        <div className="w-full flex justify-center items-center">
                         <button
                           onClick={async () => {
-                            await navigator.clipboard.writeText(address);
+                            await navigator.clipboard.writeText(getKey());
                           }}
                           className="w-[50%] rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
                         >
