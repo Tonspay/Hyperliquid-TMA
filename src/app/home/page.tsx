@@ -325,7 +325,7 @@ const Dashboard = () => {
                         item.name=="USDCARBITRUM"?
                         null:
                         <div
-                          key={index}
+                          key={"token_"+index}
                           className="flex items-center border border-gray-300 rounded-full px-3 py-1 cursor-pointer hover:bg-gray-100 transition"
                           onClick={
                             ()=>
@@ -731,7 +731,7 @@ const Dashboard = () => {
               <div className="w-full flex flex-col">
                 {
                   positions.map((item, index) => (
-                    <div className="flex w-full bg-gray-50 rounded-xl mb-3" key={index}>
+                    <div className="flex w-full bg-gray-50 rounded-xl mb-3" key={"positions_"+index}>
                       <div className="w-[80%] flex flex-col items-center justify-center">
                         <div className="w-full text-center text-xl"><p> <a>{item.position.leverage.value}x</a> {item.position.coin} <a className={"text-sm " + (Number(item.position.unrealizedPnl)>0) ? "bg-red-300" : "bg-green-300"}>{(Number(item.position.unrealizedPnl)>0)?"+":null} {((Number(item.position.unrealizedPnl)*100/Number(item.position.positionValue)).toFixed(2))}%</a> </p></div>
                       
