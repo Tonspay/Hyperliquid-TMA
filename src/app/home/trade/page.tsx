@@ -6,7 +6,7 @@ import {
   Flex,
   useDisclosure,
 } from '@chakra-ui/react'
-import { config, getChain, getKeys } from "../../core/config";
+import { config, getChain, getKeys } from "../../../core/config";
 import { useEffect, useRef, useState } from "react";
 import { formatTime, search_token_by_id, toNoBounceAddress } from "core/utils";
 
