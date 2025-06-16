@@ -27,6 +27,8 @@ const Dashboard = () => {
 
   const { open: addressOpen, onOpen: onAddressOpen, onClose: onAddressClose } = useDisclosure();
 
+  const { open: sendOpen, onOpen: onSendOpen, onClose: onSendClose } = useDisclosure();
+
   const [from, setFrom] = useState("TON");
 
   const [to, setTo] = useState("USDCARBITRUM");
@@ -526,6 +528,86 @@ const Dashboard = () => {
 
           </div>
       </div>
+
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray" style={{
+        display : sendOpen?"block":"none",
+        backgroundColor:"transparent"
+      }}>
+        <div className="bg-gray-300/70 p-6 rounded-xl shadow-lg h-full flex items-center justify-center" onClick={onSendClose}>
+            <div style={{maxWidth:"600px" , minWidth:"400px"}}>
+            <Card extra="rounded-[20px] p-3"  onClick={(e:any) => e.stopPropagation()}>
+            <section className="flex items-center py-2">
+                    <p className="grow text-center font-bold">Send fund on hyperLiquid</p>
+                  </section>
+                  <section className="flex flex-col gap-2">
+                      <div className="w-full flex justify-center items-center text-xl bg-gray-100">
+                          Reciver :
+                      </div>
+                       <div className="w-full flex justify-center items-center">
+                        <input
+                          className=" text-lg "
+                          style={{
+                            width: "70%",
+                            textAlign: "center",
+                            backgroundColor: "transparent",
+                            color: "black",
+                          }}
+                          placeholder="Who to recive the fund"
+                          
+                          onChange={(e: any) => {
+                            // setFromAmount(e.target.value)
+                          }}
+                        
+                          key="addressinput"
+                          type="text"
+                        ></input>
+                       </div>
+                       <div className="w-full flex justify-center items-center text-xl  bg-gray-100">
+                        Amount :
+                       </div>
+                       <div className="w-full flex justify-center items-center">
+                        <input
+                          className=" text-lg "
+                          style={{
+                            width: "70%",
+                            textAlign: "center",
+                            backgroundColor: "transparent",
+                            color: "black",
+                          }}
+                          min={1}
+                          step="0.1"
+                          placeholder="Min 1 $"
+                          
+                          onChange={(e: any) => {
+                            // setFromAmount(e.target.value)
+                          }}
+                        
+                          key="sendinput"
+                          type="number"
+                        ></input>
+                       </div>
+
+                        <div className="w-full flex justify-center items-center">
+                        <button
+                          onClick={async () => {
+                          //TODO send fund fnctions
+                          }}
+                          className="w-[50%] rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
+                        >
+                          Confirm
+                        </button>
+                       </div>
+
+                      <div className="w-full flex justify-center items-center text-sm text-red-300">
+                        {"⚠ Don't send funds to people you don't know ."}
+                      </div>
+                  </section>
+                  
+            </Card>
+            </div>
+
+          </div>
+      </div>
       
         <div className="w-full p-1">
           <Card extra="rounded-[20px] p-3">
@@ -598,6 +680,14 @@ const Dashboard = () => {
                   </button>
                 </div>
               </div>
+              <div className="w-full  flex justify-center items-center ">
+                <button
+                  onClick={onSendOpen}
+                  className="rounded-xl w-[80%] bg-green-200 hover:bg-green-400 transition text-center py-2 rounded"
+                >
+                  Send fund on HyperLiquid 
+                </button>
+              </div>
 
               </div>
             </div>
@@ -629,7 +719,7 @@ const Dashboard = () => {
                       
                         <div className="w-full text-center">
                           <p>
-                              <a  className="bg-gray-200   font-bold ">{item.position.positionValue}$</a>  <a  className="bg-gray-200   font-bold ">{item.position.unrealizedPnl}$</a>
+                              <a  className="bg-gray-200   font-bold ">{item.position.positionValue}$</a>  <a  className="bg-gray-200   font-bold ">{Number(item.position.unrealizedPnl)>0 ? "+"+item.position.unrealizedPnl : item.position.unrealizedPnl}$</a>
                           </p>
                         </div>
                       </div>
