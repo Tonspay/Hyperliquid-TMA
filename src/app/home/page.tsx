@@ -17,10 +17,13 @@ import {TonConnectButton} from "@tonconnect/ui-react";
 import TonWeb from 'tonweb';
 import { api_deposite, api_deposite_check } from "core/api";
 import { address } from "@ton/core";
+import { getAccountInfo } from "core/hyperLiquid";
 const Dashboard = () => {
   const { open, onOpen, onClose } = useDisclosure()
 
   const { open: orderOpen, onOpen: onOrderOpen, onClose: onOrderClose } = useDisclosure();
+
+  const { open: exportOpen, onOpen: onExportOpen, onClose: onExportClose } = useDisclosure();
 
   const [from, setFrom] = useState("TON");
 
@@ -53,12 +56,30 @@ const Dashboard = () => {
 
   const [secondsLeft, setSecondsLeft] = useState(15 * 60);
 
+  const [accountInfo, setAccountInfo] = useState(
+    {
+        accountValue: "0.0",
+        totalNtlPos: "0.0",
+        totalRawUsd: "0.0",
+        totalMarginUsed: "0.0",
+        withdrawable:"0.0"
+    }
+  );
 
   const wallet = useTonWallet();
 
+  const testAddress = "0xB3EEd3791DC4Ef67e8123c85ba8414eAB4F8bA38"
+
   useEffect(() => {
     const init = async () => {
-
+      const bal = await getAccountInfo(testAddress)
+      if(bal)
+      {
+        let sum = JSON.parse(JSON.stringify(bal.marginSummary))
+        sum['withdrawable'] = bal.withdrawable
+        setAccountInfo(sum)
+      }
+      
       // setInvoiceAddress("UQAI9ack-mbNMw2oQEuiB6899ZZ1gdDAZXWzv_oIz_N7j9-0")
       // setInvoiceAmount(1);
       // setInvoiceMemo("hello")
@@ -82,12 +103,6 @@ const Dashboard = () => {
       setInitLock(true);
       init();
     }
-    
-    if(invoiceId)
-    {
-      transactionPending()
-    }
-
     if(wallet && to =="TON")
     {
       setToAddress(toNoBounceAddress(wallet.account.address))
@@ -156,7 +171,7 @@ const Dashboard = () => {
     }
     const result = await api_deposite(
       {
-        address:"0xB3EEd3791DC4Ef67e8123c85ba8414eAB4F8bA38",
+        address:testAddress,
         amount:fromAmount
       }
     )
@@ -266,6 +281,8 @@ const Dashboard = () => {
                   <section className="flex flex-col gap-2">
                     <div className="search-items flex flex-wrap gap-2">
                       {config.chains.map((item, index) => (
+                        item.name=="USDCARBITRUM"?
+                        null:
                         <div
                           key={index}
                           className="flex items-center border border-gray-300 rounded-full px-3 py-1 cursor-pointer hover:bg-gray-100 transition"
@@ -310,213 +327,333 @@ const Dashboard = () => {
           </div>
       </div>
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray" style={{
-            display : orderOpen?"block":"none",
-            backgroundColor:"transparent"
-        }}>
-            <div className="bg-gray-300/70 p-6 rounded-xl shadow-lg h-full flex items-center justify-center">
-              <div style={{maxWidth:"600px" , minWidth:"400px"}}>
-            <Card extra="rounded-[20px] p-3"  onClick={(e:any) => e.stopPropagation()}>
-            <section className="flex items-center py-2">
-                    <p className="grow text-center font-bold">Transfer {invoiceAmount} {from} to</p>
-                  </section>
-                  <section className="flex flex-col gap-2">
-                    <div className="search-items flex flex-wrap gap-2">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray" style={{
+          display : orderOpen?"block":"none",
+          backgroundColor:"transparent"
+      }}>
+          <div className="bg-gray-300/70 p-6 rounded-xl shadow-lg h-full flex items-center justify-center">
+            <div style={{maxWidth:"600px" , minWidth:"400px"}}>
+          <Card extra="rounded-[20px] p-3"  onClick={(e:any) => e.stopPropagation()}>
+          <section className="flex items-center py-2">
+                  <p className="grow text-center font-bold">Transfer {invoiceAmount} {from} to</p>
+                </section>
+                <section className="flex flex-col gap-2">
+                  <div className="search-items flex flex-wrap gap-2">
+                    <div className="w-full flex justify-center items-center">
+                      <div className="flex w-full">
+                        <pre className="w-full text-center text-sm bg-gray-200 p-2 rounded">{invoiceAddress}</pre>
+                      </div>
+                    </div>
                       <div className="w-full flex justify-center items-center">
-                        <div className="flex w-full">
-                          <pre className="w-full text-center text-sm bg-gray-200 p-2 rounded">{invoiceAddress}</pre>
+                        <button
+                          onClick={() => handleCopy(invoiceAddress, 0)}
+                          className="w-3/5 text-xs px-2 py-1 rounded-xl bg-gray-200 hover:bg-gray-100 transition text-center"
+                        >
+                          {copiedIndex === 1 ? 'Copied!' : 'Copy'}
+                        </button>
+
+                      </div>
+                      {
+                        invoiceMemo?
+                        <div className="w-full flex justify-center items-center" style={{color:"red"}}>
+                          ⚠ Copy memo and send with funds ⚠
+                        </div>
+                        :null
+                      }
+                      {
+                        invoiceMemo?
+                        <div className="w-full flex justify-center items-center">
+                          <pre className="text-sm bg-gray-100 p-2 rounded">{invoiceMemo}
+                          <button
+                            onClick={async() => {await navigator.clipboard.writeText(invoiceMemo);}}
+                            className="w-3/5 text-xs px-2 py-1 rounded-xl bg-gray-300 hover:bg-gray-400 transition text-center"
+                          >
+                            { 'Copy'}
+                          </button>
+                          </pre>
+                      </div>
+                      :
+                      null
+                      }
+                    <div className="w-full flex justify-center items-center">
+                        <img
+                        src={invoiceImg?invoiceImg:"/img/logo.png"}
+                        style={{
+                          width:"50%",
+                          height:"50%",
+                          minWidth:"256px",
+                          minHeight:"256px"
+                        }}
+                        />
+                      </div>
+
+
+                      <div className="w-full flex justify-center items-center">
+                        <div className="text-6xl font-bold text-gray-300">
+                          {formatTime(secondsLeft)}
                         </div>
                       </div>
-                        <div className="w-full flex justify-center items-center">
-                          <button
-                            onClick={() => handleCopy(invoiceAddress, 0)}
-                            className="w-3/5 text-xs px-2 py-1 rounded-xl bg-gray-200 hover:bg-gray-100 transition text-center"
-                          >
-                            {copiedIndex === 1 ? 'Copied!' : 'Copy'}
-                          </button>
 
-                        </div>
                         {
-                          invoiceMemo?
-                          <div className="w-full flex justify-center items-center" style={{color:"red"}}>
-                            ⚠ Copy memo and send with funds ⚠
-                          </div>
-                          :null
-                        }
-                        {
-                          invoiceMemo?
-                          <div className="w-full flex justify-center items-center">
-                            <pre className="text-sm bg-gray-100 p-2 rounded">{invoiceMemo}
-                            <button
-                              onClick={async() => {await navigator.clipboard.writeText(invoiceMemo);}}
-                              className="w-3/5 text-xs px-2 py-1 rounded-xl bg-gray-300 hover:bg-gray-400 transition text-center"
-                            >
-                              { 'Copy'}
-                            </button>
-                            </pre>
+                          from=="TON"?
+                          <div className="w-full flex justify-center items-center bg-white">
+                          <button
+                            className="w-full min-h-[50px] rounded-xl bg-[#e6ddc0] text-white text-lg font-semibold hover:bg-[#614c38] transition duration-200 shadow-md"
+                            onClick={send}
+                          >
+                            Connect And Send
+                          </button>
                         </div>
                         :
                         null
                         }
+                  </div>
+                      <div className="w-full flex justify-center items-center text-sm">
+                        {/* {tips} */}
+                      </div>
+                </section>
+                
+          </Card>
+            </div>
+          </div>
+      </div>
+
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray" style={{
+        display : exportOpen?"block":"none",
+        backgroundColor:"transparent"
+      }}>
+        <div className="bg-gray-300/70 p-6 rounded-xl shadow-lg h-full flex items-center justify-center" onClick={onExportClose}>
+            <div style={{maxWidth:"600px" , minWidth:"400px"}}>
+            <Card extra="rounded-[20px] p-3"  onClick={(e:any) => e.stopPropagation()}>
+            <section className="flex items-center py-2">
+                    <p className="grow text-center font-bold">Export PrivateKey</p>
+                  </section>
+                  <section className="flex flex-col gap-2">
                       <div className="w-full flex justify-center items-center">
-                          <img
-                          src={invoiceImg?invoiceImg:"/img/logo.png"}
-                          style={{
-                            width:"50%",
-                            height:"50%",
-                            minWidth:"256px",
-                            minHeight:"256px"
+                          <pre className="text-sm bg-gray-100 p-2 rounded">{testAddress}
+
+                          </pre>
+                      </div>
+                       <div className="w-full flex justify-center items-center">
+                        <button
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(testAddress);
                           }}
-                          />
-                        </div>
+                          className="w-[50%] rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
+                        >
+                          Copy
+                        </button>
+                       </div>
 
 
-                        <div className="w-full flex justify-center items-center">
-                          <div className="text-6xl font-bold text-gray-300">
-                            {formatTime(secondsLeft)}
-                          </div>
-                        </div>
-
-                          {
-                            from=="TON"?
-                            <div className="w-full flex justify-center items-center bg-white">
-                            <button
-                              className="w-full min-h-[50px] rounded-xl bg-[#e6ddc0] text-white text-lg font-semibold hover:bg-[#614c38] transition duration-200 shadow-md"
-                              onClick={send}
-                            >
-                              Connect And Send
-                            </button>
-                          </div>
-                          :
-                          null
-                          }
-                    </div>
-                        <div className="w-full flex justify-center items-center text-sm">
-                         {/* {tips} */}
-                        </div>
+                      <div className="w-full flex justify-center items-center text-sm">
+                        {"⚠ Please don't share this key to anyone . You can import it into metamask or other wallet ."}
+                      </div>
                   </section>
                   
             </Card>
+            </div>
+
+          </div>
+      </div>
+
+
+        <div className="w-full p-1">
+          <Card extra="rounded-[20px] p-3">
+            <div className="flex gap-2.5 justify-center">
+                      <div className="flex flex-col border-dashed border-2 border-divider py-2 px-6 rounded-xl">
+                        <span className="text-default-900 text-xl font-semibold">
+                          Balance
+                        </span>
+                      </div>
+            </div>
+            <div className="w-full">
+
+              <div className="w-full flex flex-col">
+                <div className="flex w-full">
+                  <div className="w-1/2 flex flex-col items-center justify-center">
+                    <div className="w-full text-center  font-bold text-xl">Total Value</div>
+                    <div className="w-full text-center">{accountInfo.accountValue} $</div>
+                  </div>
+                  <div className="w-1/2 flex flex-col items-center justify-center">
+                    <div className="w-full text-center   font-bold text-xl">Margin Used</div>
+                    <div className="w-full text-center">{accountInfo.totalMarginUsed} $</div>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full flex flex-col mt-4">
+                <div className="flex w-full">
+                  <div className="w-1/2 flex flex-col items-center justify-center">
+                    <div className="w-full text-center   font-bold text-xl">NTL POS</div>
+                    <div className="w-full text-center">{accountInfo.totalNtlPos} $</div>
+                  </div>
+                  <div className="w-1/2 flex flex-col items-center justify-center">
+                    <div className="w-full text-center   font-bold text-xl">Withdrawable</div>
+                    <div className="w-full text-center">{accountInfo.withdrawable} $</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full">
+                  <div className="w-full flex justify-center items-center">
+                      <pre className="text-sm bg-gray-100 p-2 rounded">{testAddress}
+
+                      </pre>
+                  </div>
+
+              <div className="w-full flex justify-center items-center">
+                <div className="flex space-x-1">
+                  <button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(testAddress);
+                    }}
+                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
+                  >
+                    Copy
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      window.open(`https://app.hyperliquid.xyz/explorer/address/${testAddress}`)
+                    }}
+                    className="rounded-xl w-24 bg-gray-300 hover:bg-gray-400 transition text-center py-2 rounded"
+                  >
+                    History
+                  </button>
+
+                  <button
+                    onClick={onExportOpen}
+                    className="rounded-xl w-32 bg-red-200 hover:bg-red-400 transition text-center py-2 rounded"
+                  >
+                    Export Wallet
+                  </button>
+                </div>
+              </div>
+
               </div>
             </div>
+
+          </Card>
+        </div>
+        <div className="w-full p-1">
+          <Card extra="rounded-[20px] p-3">
+            <div className="flex gap-2.5 justify-center">
+                      <div className="flex flex-col border-dashed border-2 border-divider py-2 px-6 rounded-xl">
+                        <span className="text-default-900 text-xl font-semibold">
+                          Deposit
+                        </span>
+                      </div>
+            </div>
+            <div  style={{ justifyItems:"center", width: "100%" }}>
+                <div className="flex flex-col gap-6" style={{ width: "100%" }}>
+                  <div className="flex flex-col justify-center gap-1 relative">
+                    <div className="card_head flex justify-between">
+                      <p>From</p>
+                    </div> 
+                    <div className="card_body flex justify-between items-center text-white">
+
+                        {
+                          search_token_by_id(from) ? 
+                          <button
+                          className="flex items-center gap-2 rounded-xl p-2 cursor-pointer bg-[#e6ddc0] hover:bg-black"
+                          style={{ minWidth: "15%" }}
+                          onClick={
+                            ()=>
+                            {
+                              setSelect(true);
+                              onOpen()
+                            }
+                          }
+                        >
+    
+                          <img src={(search_token_by_id(from) as any).img} style={{
+                            width:"30px"
+                          }}></img>
+                          <span className="text-medium ">{(search_token_by_id(from) as any).name}</span>
+                          <RiArrowDropDownLine size={24} />
+                        </button>
+                        :
+                        null
+                        }
+
+
+                      <input
+                        className=" text-3xl "
+                        style={{
+                          width: "70%",
+                          textAlign: "right",
+                          backgroundColor: "transparent",
+                          color: "black",
+                        }}
+                        min={3}
+                        step="0.1"
+                        placeholder="Min 3 TON"
+                        
+                        onChange={(e: any) => {
+                          setFromAmount(e.target.value)
+                          if(Number(e.target.value)>0)
+                          {
+                            estimatePrice(e.target.value)
+                          }
+                        }}
+                      
+                        key="payinput"
+                        type="number"
+                      ></input>
+                    </div>
+                    <div className="card_foot flex justify-between">
+                      <p></p>
+                      <p>
+                        <span className="text-sm" style={{ color: "gray" }}>
+                          {miniFrom} ~ {maxFrom}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="trans-icon rounded-full h-6 w-full flex justify-center">
+                      <div className="w-6 h-6 flex justify-center bg-white items-center rounded-full shadow-md" onClick={
+                        ()=>
+                        {
+                          let _to = to;
+                          setTo(from);
+                          setFrom(_to);
+                        }
+                      }>
+                        <FaArrowDown color="[#e6ddc0]" />
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <input className=" w-full h-[50px]  text-center  text-3xl font-bold" disabled={true} value={toAmount+" $"}>
+                      </input>
+                    </div>
+                    <div className="card_foot flex justify-between  text-xs">
+                      {/* <p>{selectedTokenInfo.info.name}</p> */}
+                      <p></p>
+                      <p>
+                        <span className="text-sm" style={{ color: "gray" }}>
+                          Network Fee :~ {toFee?toFee:0}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="text-center text-gray-500 text-xs">
+                      Deposit Fee : 1 $
+                    </div>
+                    <div className="bottom-14 right-0 w-full p-4">
+
+                  <button
+                    className="w-full min-h-[50px] rounded-xl bg-[#e6ddc0] text-white text-lg font-semibold hover:bg-[#614c38] transition duration-200 shadow-md"
+                    onClick={confirm}
+                  >
+                    Deposit Now
+                  </button>
+                    </div>
+                      </div>
+                  </div>
+
+            </div>
+          </Card>
         </div>
 
-        <Card extra="rounded-[20px] p-3">
-          <div className="flex gap-2.5 justify-center">
-                    <div className="flex flex-col border-dashed border-2 border-divider py-2 px-6 rounded-xl">
-                      <span className="text-default-900 text-xl font-semibold">
-                        Deposit Asserts
-                      </span>
-                    </div>
-          </div>
-          <div  style={{ justifyItems:"center", width: "100%" }}>
-              <div className="flex flex-col gap-6" style={{ width: "100%" }}>
-                <div className="flex flex-col justify-center gap-1 relative">
-                  <div className="card_head flex justify-between">
-                    <p>From</p>
-                  </div> 
-                  <div className="card_body flex justify-between items-center text-white">
-
-                      {
-                        search_token_by_id(from) ? 
-                        <button
-                        className="flex items-center gap-2 rounded-xl p-2 cursor-pointer bg-[#e6ddc0] hover:bg-black"
-                        style={{ minWidth: "15%" }}
-                        onClick={
-                          ()=>
-                          {
-                            setSelect(true);
-                            onOpen()
-                          }
-                        }
-                      >
-  
-                        <img src={(search_token_by_id(from) as any).img} style={{
-                          width:"30px"
-                        }}></img>
-                        <span className="text-medium ">{(search_token_by_id(from) as any).name}</span>
-                        <RiArrowDropDownLine size={24} />
-                      </button>
-                      :
-                      null
-                      }
-
-
-                    <input
-                      className=" text-3xl "
-                      style={{
-                        width: "70%",
-                        textAlign: "right",
-                        backgroundColor: "transparent",
-                        color: "black",
-                      }}
-                      min={3}
-                      step="0.1"
-                      placeholder="Min 3 TON"
-                      
-                      onChange={(e: any) => {
-                        setFromAmount(e.target.value)
-                        if(Number(e.target.value)>0)
-                        {
-                          estimatePrice(e.target.value)
-                        }
-                      }}
-                    
-                      key="payinput"
-                      type="number"
-                    ></input>
-                  </div>
-                  <div className="card_foot flex justify-between">
-                    <p></p>
-                    <p>
-                      <span className="text-sm" style={{ color: "gray" }}>
-                        {miniFrom} ~ {maxFrom}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="trans-icon rounded-full h-6 w-full flex justify-center">
-                    <div className="w-6 h-6 flex justify-center bg-white items-center rounded-full shadow-md" onClick={
-                      ()=>
-                      {
-                        let _to = to;
-                        setTo(from);
-                        setFrom(_to);
-                      }
-                    }>
-                      <FaArrowDown color="[#e6ddc0]" />
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <input className=" w-full h-[50px]  text-center  text-3xl font-bold" disabled={true} value={toAmount+" $"}>
-                    </input>
-                  </div>
-                  <div className="card_foot flex justify-between  text-xs">
-                    {/* <p>{selectedTokenInfo.info.name}</p> */}
-                    <p></p>
-                    <p>
-                      <span className="text-sm" style={{ color: "gray" }}>
-                        Network Fee :~ {toFee?toFee:0}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="text-center text-gray-500 text-xs">
-                    Deposit Fee : 1 $
-                  </div>
-                  <div className="bottom-14 right-0 w-full p-4">
-
-                <button
-                  className="w-full min-h-[50px] rounded-xl bg-[#e6ddc0] text-white text-lg font-semibold hover:bg-[#614c38] transition duration-200 shadow-md"
-                  onClick={confirm}
-                >
-                  Deposit Now
-                </button>
-                  </div>
-                    </div>
-                </div>
-
-          </div>
-        </Card>
       </div>
     </div>
   );

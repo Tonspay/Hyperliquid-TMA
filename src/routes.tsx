@@ -27,7 +27,7 @@ const routes = [
     name: 'Future Trading',
     layout: '/home',
     icon: <AiOutlineStock className="h-6 w-6" />,
-    path: 'future',
+    path: 'dev',
   },
   {
     name: 'Support',
