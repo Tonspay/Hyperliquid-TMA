@@ -34,20 +34,24 @@ const closePosition = async (wallet:any, {
 }) =>
 {
     const exchClient = new ExchangeClient({ wallet, transport });
+    const info = await getFutureDetailsByName(symbol);
+    if(!info)
+    {
+        return false;
+    }
+
     return await exchClient.order(
         {
             orders: [{
-                a: symbol,
+                a: Number(info.id),
                 b: false,
-                p: "0",
+                p: info.market.markPx,
                 s: amount,
                 r: false,
                 t:{
-                    trigger:{
-                        isMarket:true,
-                        triggerPx:"",
-                        tpsl:"tp"
-                    }
+                    limit: {
+                        tif: "Ioc",
+                    },
                 }
                 
             }],
@@ -56,6 +60,93 @@ const closePosition = async (wallet:any, {
     )
 }
 
+const marketPriceOrder = async (wallet:any, {
+    symbol,
+    amount,
+    isBuy
+}) =>
+{
+    const exchClient = new ExchangeClient({ wallet, transport });
+    const info = await getFutureDetailsByName(symbol);
+    if(!info)
+    {
+        return false;
+    }
+    let _final = {
+            orders: [{
+                a: Number(info.id),
+                b: isBuy,
+                p: info.market.markPx,
+                s: amount,
+                r: false,
+                t:{
+                    limit: {
+                        tif: "Ioc",
+                    },
+                }
+                
+            }],
+            grouping: "na",
+        }
+    console.log("final ::",_final,wallet)
+    return await exchClient.order(_final as any)
+}
+const limitPriceOrder = async (wallet:any, {
+    symbol,
+    amount,
+    isBuy,
+    price
+}) =>
+{
+    const exchClient = new ExchangeClient({ wallet, transport });
+    const info = await getFutureDetailsByName(symbol);
+    if(!info)
+    {
+        return false;
+    }
+
+    return await exchClient.order(
+        {
+            orders: [{
+                a: Number( info.id),
+                b: isBuy,
+                p: price,
+                s: amount,
+                r: false,
+                t:{
+                    limit: {
+                        tif: "Gtc",
+                    },
+                }
+                
+            }],
+            grouping: "na",
+        }
+    )
+}
+
+const cancelOrder = async(wallet:any , {
+    symbol,
+    id
+})=>
+{
+    const exchClient = new ExchangeClient({ wallet, transport });
+    const info = await getFutureDetailsByName(symbol);
+    if(!info)
+    {
+        return false;
+    }
+
+    return await exchClient.cancel(
+        {
+            cancels: [{
+                a: Number(info.id),
+                o:id
+                
+            }],
+        }
+    )
+}
 const getFutureDetailsByName = async(name:string) =>
 {
     const info = await api_hyper_liquid_info("metaAndAssetCtxs");
@@ -68,6 +159,7 @@ const getFutureDetailsByName = async(name:string) =>
             {
                 const ret = {
                     name,
+                    id:i,
                     info:(info[0].universe)[i],
                     market:info[1][i]
                 }
@@ -76,12 +168,37 @@ const getFutureDetailsByName = async(name:string) =>
             }
         }
     }
-    console.log(info)
+}
+
+const getFutureTokenList = async()=>
+{
+    const info = await api_hyper_liquid_info("metaAndAssetCtxs");
+    if(!info || info?.length<1)
+    {
+        return false;
+    }
+    let ret = [];
+    for(let i in info[0].universe)
+        {
+            ret.push(
+                {
+                    name:info[0].universe[i].name,
+                    id:i,
+                    info:(info[0].universe)[i],
+                    market:info[1][i]
+                }
+            )
+        }
+    return ret;
 }
 export {
     getAccountInfo,
     getAccountOpenOrders,
     sendFundToOthers,
     closePosition,
-    getFutureDetailsByName
+    getFutureDetailsByName,
+    getFutureTokenList,
+    marketPriceOrder,
+    limitPriceOrder,
+    cancelOrder
 }

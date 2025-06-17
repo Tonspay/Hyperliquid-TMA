@@ -87,9 +87,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const init = async () => {
-      await getFutureDetailsByName("BTC")
       const wallet = getWallet()
-    //   console.log("wallet",wallet)
       if(!wallet)
       {
         console.log("wallet not exsit")
@@ -307,6 +305,25 @@ const Dashboard = () => {
       window.location.reload()
     }
   }
+
+  const updateProfile = async()=>
+  {
+      const bal = await getAccountInfo((wallet as any).address)
+      if(bal)
+      {
+        let sum = JSON.parse(JSON.stringify(bal.marginSummary))
+        sum['withdrawable'] = bal.withdrawable
+        setAccountInfo(sum)
+        console.log(bal)
+        if(bal?.assetPositions && bal.assetPositions.length>0)
+        {
+          setPositions(
+            bal.assetPositions
+          )
+        }
+      }
+  }
+
 
   return (
       <div className="p-5 space-y-5 mt-5 block w-full justify-items-center">
@@ -718,10 +735,8 @@ const Dashboard = () => {
         </div>
 
         {
-          positions.length==0&&false ?
-          null:
-          
-        <div className="w-full p-1">
+          (positions?.length>0) ?
+          <div className="w-full p-1">
           <Card extra="rounded-[20px] p-3">
             <div className="flex gap-2.5 justify-center">
                       <div className="flex flex-col border-dashed border-2 border-divider py-2 px-6 rounded-xl">
@@ -750,7 +765,8 @@ const Dashboard = () => {
                         onClick={
                           async()=>
                           {
-                            const cls = await closePosition(getWallet(),
+                            const cls = await closePosition(
+                              getWallet(),
                               {
                                 symbol:item.position.coin,
                                 amount:item.position.szi
@@ -758,6 +774,7 @@ const Dashboard = () => {
                             )
 
                             console.log("Try close position ::",cls)
+                            await updateProfile()
                           }
                         }
                         >
@@ -773,6 +790,8 @@ const Dashboard = () => {
 
           </Card>
         </div>
+        :
+        null
         }
         <div className="w-full p-1">
           <Card extra="rounded-[20px] p-3">

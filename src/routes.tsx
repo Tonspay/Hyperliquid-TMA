@@ -16,9 +16,9 @@ const routes = [
     icon: <CgProfile className="h-6 w-6" />,
   },
   {
-    name: 'Trade',
+    name: 'Perps-Trade',
     layout: '/home',
-    path: 'dev',
+    path: 'trade',
     icon: <RiStockLine className="h-6 w-6" />,
 
     secondary: true,
