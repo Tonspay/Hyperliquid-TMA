@@ -44,9 +44,9 @@ const closePosition = async (wallet:any, {
         {
             orders: [{
                 a: Number(info.id),
-                b: false,
-                p: info.market.markPx,
-                s: amount,
+                b: !(Number(amount)>0),
+                p: (Number(info.market.markPx)*(Number(amount)>0?0.999:1.001)).toFixed(5),
+                s: Math.abs(Number(amount)).toString(),
                 r: false,
                 t:{
                     limit: {
@@ -76,19 +76,19 @@ const marketPriceOrder = async (wallet:any, {
             orders: [{
                 a: Number(info.id),
                 b: isBuy,
-                p: info.market.markPx,
+                p:(Number(info.market.markPx)*(isBuy?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
                 s: amount,
                 r: false,
                 t:{
                     limit: {
-                        tif: "Ioc",
+                        tif: "Gtc",
                     },
                 }
                 
             }],
             grouping: "na",
         }
-    console.log("final ::",_final,wallet)
+    console.log("final ::",_final)
     return await exchClient.order(_final as any)
 }
 const limitPriceOrder = async (wallet:any, {

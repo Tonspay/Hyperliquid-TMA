@@ -105,7 +105,12 @@ const Dashboard = () => {
           setPositions(
             bal.assetPositions
           )
+        }else
+        {
+          setPositions([])
         }
+      }else{
+        setPositions([])
       }
   }
 
@@ -116,6 +121,8 @@ const Dashboard = () => {
       if(orders.length>0)
       {
         setOrders(orders)
+      }else{
+        setOrders([])
       }
   }
   const [copiedIndex, setCopiedIndex] = useState<number>(0);
@@ -156,6 +163,8 @@ const Dashboard = () => {
 
       console.log("order",order)
     }
+    await updateProfile()
+    await updateOrders()
   }
   return (
       <div className="p-5 space-y-5 mt-5 block w-full justify-items-center">
@@ -386,7 +395,6 @@ const Dashboard = () => {
                                 }
                               )
                               console.log(cls)
-                              await sleep(3000) // Sleep 3s and reload
                               await updateProfile()
                             }
                           }

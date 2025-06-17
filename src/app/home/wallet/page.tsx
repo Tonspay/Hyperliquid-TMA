@@ -320,7 +320,13 @@ const Dashboard = () => {
           setPositions(
             bal.assetPositions
           )
+        }else
+        {
+          setPositions([])
         }
+      }else
+      {
+        setPositions([])
       }
   }
 
