@@ -4,6 +4,10 @@ const config = {
         router:{
             deposite:"/deposite",
             deposite_check:"/deposite"
+        },
+        hyperLiquidUrl:"https://api.hyperliquid.xyz",
+        hyperLiquidRouter:{
+            info:"/info"
         }
     },
     storage:{

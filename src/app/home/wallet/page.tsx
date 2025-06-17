@@ -17,7 +17,7 @@ import {TonConnectButton} from "@tonconnect/ui-react";
 import TonWeb from 'tonweb';
 import { api_deposite, api_deposite_check } from "core/api";
 import { address } from "@ton/core";
-import { closePosition, getAccountInfo, sendFundToOthers } from "core/hyperLiquid";
+import { closePosition, getAccountInfo, getFutureDetailsByName, sendFundToOthers } from "core/hyperLiquid";
 import { getWallet } from "core/web3";
 import { getKey } from "core/storage";
 const Dashboard = () => {
@@ -87,6 +87,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const init = async () => {
+      await getFutureDetailsByName("BTC")
       const wallet = getWallet()
     //   console.log("wallet",wallet)
       if(!wallet)

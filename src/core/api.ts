@@ -68,7 +68,25 @@ async function requester(url: string, requestOptions: any) {
       return 0;
     }
   }
+
+  async function api_hyper_liquid_info(type:string) {
+    try {
+      return await requester(
+        `${config.api.hyperLiquidUrl+config.api.hyperLiquidRouter.info}`,
+        request_post_unauth(
+          {
+            type
+          }
+        ),
+      );
+    } catch (e) {
+      console.error(e);
+  
+      return 0;
+    }
+  }
   export {
     api_deposite,
-    api_deposite_check
+    api_deposite_check,
+    api_hyper_liquid_info
   }

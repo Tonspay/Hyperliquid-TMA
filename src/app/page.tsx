@@ -37,7 +37,7 @@ export default function Home({}) {
   }
 
   useEffect(() => {
-    keygen()
-    // redirect('/home');
+    // keygen()
+    redirect('/home/wallet');
     }, []);
 }
