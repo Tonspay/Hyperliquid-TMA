@@ -108,10 +108,10 @@ const limitPriceOrder = async (wallet:any, {
     return await exchClient.order(
         {
             orders: [{
-                a: Number( info.id),
+                a: Number(info.id),
                 b: isBuy,
                 p: price,
-                s: amount,
+                s: (Number(amount)/price).toFixed(Number(info.info.szDecimals)),
                 r: false,
                 t:{
                     limit: {
