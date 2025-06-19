@@ -511,6 +511,22 @@ const Dashboard = () => {
                         >
                           Copy
                         </button>
+
+                          <button
+                          onClick={async () => {
+                                const text = getKey();
+                                const dataUrl = await generateQRCodeBase64(text);
+                                const link = document.createElement('a');
+                                link.href = dataUrl;
+                                link.download = 'backup-qr.png';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                          }}
+                          className="w-[50%] rounded-xl w-32 bg-gray-200 hover:bg-grat-400 transition text-center py-2 rounded"
+                        >
+                          Backup QR
+                        </button>
                        </div>
 
 
