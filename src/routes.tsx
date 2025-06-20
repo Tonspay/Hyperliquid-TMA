@@ -12,7 +12,7 @@ const routes = [
   {
     name: 'My Wallet',
     layout: '/home',
-    path: '/',
+    path: '/wallet',
     icon: <CgProfile className="h-6 w-6" />,
   },
   {

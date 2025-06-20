@@ -280,11 +280,11 @@ const Dashboard = () => {
           console.log("check",check)
           if(check.data)
           {
-              location.href="/home"
+              location.href="/home/wallet"
           }
           if(secondsLeft == 0 )
           {
-              location.href="/home"
+              location.href="/home/wallet"
           }
       }
   }
