@@ -45,7 +45,7 @@ const closePosition = async (wallet:any, {
             orders: [{
                 a: Number(info.id),
                 b: !(Number(amount)>0),
-                p: (Number(info.market.markPx)*(Number(amount)>0?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
+                p: (Number(info.market.markPx)*(Number(amount)>0?0.99:1.01)).toFixed(5-Number(info.info.szDecimals)),
                 s: Math.abs(Number(amount)).toString(),
                 r: false,
                 t:{
@@ -91,7 +91,7 @@ const marketPriceOrder = async (wallet:any, {
 
         let _final = {
             orders: [{
-                a: (Number(info.market.markPx)*(isBuy?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
+                a: (Number(info.market.markPx)*(isBuy?0.99:1.01)).toFixed(5-Number(info.info.szDecimals)),
                 b: isBuy,
                 p:info.market.markPx,
                 s: amount,
