@@ -45,12 +45,12 @@ const closePosition = async (wallet:any, {
             orders: [{
                 a: Number(info.id),
                 b: !(Number(amount)>0),
-                p: (Number(info.market.markPx)*(Number(amount)>0?0.999:1.001)).toFixed(5),
+                p: (Number(info.market.markPx)*(Number(amount)>0?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
                 s: Math.abs(Number(amount)).toString(),
                 r: false,
                 t:{
                     limit: {
-                        tif: "Ioc",
+                        tif: "FrontendMarket",
                     },
                 }
                 
@@ -72,16 +72,33 @@ const marketPriceOrder = async (wallet:any, {
     {
         return false;
     }
-    let _final = {
+    // let _final = {
+    //         orders: [{
+    //             a: Number(info.id),
+    //             b: isBuy,
+    //             p:(Number(info.market.markPx)*(isBuy?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
+    //             s: amount,
+    //             r: false,
+    //             t:{
+    //                 limit: {
+    //                     tif: "Gtc",
+    //                 },
+    //             }
+                
+    //         }],
+    //         grouping: "na",
+    //     }
+
+        let _final = {
             orders: [{
-                a: Number(info.id),
+                a: (Number(info.market.markPx)*(isBuy?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
                 b: isBuy,
-                p:(Number(info.market.markPx)*(isBuy?0.999:1.001)).toFixed(5-Number(info.info.szDecimals)),
+                p:info.market.markPx,
                 s: amount,
                 r: false,
                 t:{
                     limit: {
-                        tif: "Gtc",
+                        tif: "FrontendMarket",
                     },
                 }
                 
